@@ -1,5 +1,13 @@
 langchain
-langchain_community
-python-dotenv
+langchain-community
+langchain-core
+langchain-text-splitters
+langsmith
 pandas
+python-dotenv
+requests
+# RAG를 위해 추가된 라이브러리
+langchain-google-genai
+faiss-cpu
+pypdf
 pytest

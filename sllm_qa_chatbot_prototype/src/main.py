@@ -1,30 +1,31 @@
 import os
-from src.llm_core import initialize_llm_chain, generate_response
-from src.data_handler import load_qa_data
 from dotenv import load_dotenv
+from src.data_handler import load_qa_data_as_docs
+from src.llm_core import create_rag_chain
 
 def main():
     """
-    커맨드 라인 챗봇 인터페이스를 실행하는 메인 함수
+    RAG 기반의 커맨드 라인 챗봇 인터페이스를 실행하는 메인 함수
     """
-    # .env 파일에서 환경 변수 로드
     load_dotenv()
 
-    # 프로젝트 루트 디렉터리 경로 설정
+    # 데이터 로드
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     csv_file_path = os.path.join(project_root, 'data', 'qa_data.csv')
+    documents = load_qa_data_as_docs(csv_file_path)
 
-    # Q&A 데이터 로드
-    qa_data = load_qa_data(csv_file_path)
-    if not qa_data:
-        print("Q&A 데이터를 로드할 수 없습니다. 자유로운 대화 모드로 실행합니다.")
+    if not documents:
+        print("문서 데이터를 로드할 수 없습니다. 프로그램을 종료합니다.")
+        return
 
-    print("sLLM Q&A 챗봇 프로토타입. 종료하려면 'exit'를 입력하세요.")
+    print("RAG 챗봇을 초기화하는 중입니다...")
 
     try:
-        llm_chain = initialize_llm_chain()
-    except ValueError as e:
-        print(f"초기화 오류: {e}")
+        # RAG 체인 생성
+        rag_chain = create_rag_chain(documents)
+        print("챗봇이 준비되었습니다. 종료하려면 'exit'를 입력하세요.")
+    except Exception as e:
+        print(f"RAG 체인 생성 중 오류 발생: {e}")
         return
 
     while True:
@@ -36,19 +37,12 @@ def main():
         if not user_input.strip():
             continue
 
-        # 데이터에서 질문 찾아보기
-        found_answer = None
-        for item in qa_data:
-            if user_input.strip().lower() == item['question'].lower():
-                found_answer = item['answer']
-                break
-        
-        if found_answer:
-            print(f"Bot: {found_answer}")
-        else:
-            # 데이터에 없는 경우 LLM을 통해 응답 생성
-            bot_response = generate_response(llm_chain, user_input)
+        # RAG 체인을 통해 답변 생성
+        try:
+            bot_response = rag_chain.invoke(user_input)
             print(f"Bot: {bot_response}")
+        except Exception as e:
+            print(f"답변 생성 중 오류 발생: {e}")
 
 if __name__ == "__main__":
     main()
