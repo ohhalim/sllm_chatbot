@@ -8,6 +8,15 @@ python-dotenv
 requests
 # RAG를 위해 추가된 라이브러리
 langchain-google-genai
+langchain-ollama
 faiss-cpu
 pypdf
 pytest
+
+# FastAPI 및 데이터베이스 관련
+fastapi
+uvicorn
+sqlalchemy
+asyncpg
+psycopg2-binary
+pgvector

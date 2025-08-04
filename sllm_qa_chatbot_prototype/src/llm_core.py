@@ -23,9 +23,9 @@ def create_rag_chain(documents: List[Document]):
     if not os.getenv("GOOGLE_API_KEY"):
         raise ValueError("GOOGLE_API_KEY 환경 변수를 찾을 수 없습니다. .env 파일을 확인해주세요.")
 
-    # 1. 모델 및 임베딩 초기화 (Gemini)
-    model = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.7)
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    # 1. 모델 및 임베딩 초기화 (Ollama)
+    model = ChatOllama(model="qwen3:0.6b", temperature=0.7)
+    embeddings = OllamaEmbeddings(model="qwen3:0.6b")
 
     # 2. 벡터 저장소 생성 (FAISS)
     # documents가 비어있으면 에러가 발생하므로 확인

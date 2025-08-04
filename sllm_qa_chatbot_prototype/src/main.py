@@ -1,48 +1,17 @@
-import os
-from dotenv import load_dotenv
-from src.data_handler import load_qa_data_as_docs
-from src.llm_core import create_rag_chain
+from fastapi import FastAPI
+from src.database import engine, Base
 
-def main():
-    """
-    RAG 기반의 커맨드 라인 챗봇 인터페이스를 실행하는 메인 함수
-    """
-    load_dotenv()
+# 데이터베이스 테이블 생성
+async def create_tables():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-    # 데이터 로드
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    csv_file_path = os.path.join(project_root, 'data', 'qa_data.csv')
-    documents = load_qa_data_as_docs(csv_file_path)
+app = FastAPI()
 
-    if not documents:
-        print("문서 데이터를 로드할 수 없습니다. 프로그램을 종료합니다.")
-        return
+@app.on_event("startup")
+async def on_startup():
+    await create_tables()
 
-    print("RAG 챗봇을 초기화하는 중입니다...")
-
-    try:
-        # RAG 체인 생성
-        rag_chain = create_rag_chain(documents)
-        print("챗봇이 준비되었습니다. 종료하려면 'exit'를 입력하세요.")
-    except Exception as e:
-        print(f"RAG 체인 생성 중 오류 발생: {e}")
-        return
-
-    while True:
-        user_input = input("You: ")
-        if user_input.lower() == 'exit':
-            print("챗봇을 종료합니다.")
-            break
-
-        if not user_input.strip():
-            continue
-
-        # RAG 체인을 통해 답변 생성
-        try:
-            bot_response = rag_chain.invoke(user_input)
-            print(f"Bot: {bot_response}")
-        except Exception as e:
-            print(f"답변 생성 중 오류 발생: {e}")
-
-if __name__ == "__main__":
-    main()
+@app.get("/")
+async def root():
+    return {"message": "Hello World, database tables are ready!"}
