@@ -20,3 +20,6 @@ sqlalchemy
 asyncpg
 psycopg2-binary
 pgvector
+fastmcp
+mido
+python-rtmidi
