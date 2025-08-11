@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+psycopg
+langchain
+langchain-community
+ollama
+music21
+faiss-cpu
+sentence-transformers
+python-dotenv
